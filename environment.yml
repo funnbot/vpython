@@ -1,0 +1,11 @@
+name: vpython
+channels:
+  - conda-forge
+dependencies:
+  - astropy
+  - jupyter
+  - jupyterlab-vpython
+  - numpy
+  - python=3.12
+  - setuptools==81.0.0
+  - vpython
