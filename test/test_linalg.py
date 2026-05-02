@@ -1,5 +1,10 @@
 import unittest
-from src.linalg import reshape_to_row_vec, reshape_to_col_vec, reshape_to_vec3d
+from src.linalg import (
+    reshape_to_row_vec,
+    reshape_to_col_vec,
+    reshape_to_vec3d,
+    make_vec3d_array,
+)
 
 import numpy as np
 import numpy.testing as npt
@@ -32,6 +37,12 @@ class TestLinalg(unittest.TestCase):
         vec = reshape_to_vec3d(col_vec)
         self.assertEqual(vec.shape, (3,))
         npt.assert_array_equal(vec, [1.0, 2.0, 3.0])
+
+    def test_make_vec3d_array(self):
+        vecs = [np.array([1.0, 2.0, 3.0]), np.array([4.0, 5.0, 6.0])]
+        array = make_vec3d_array(vecs)
+        self.assertEqual(array.shape, (2, 3))
+        npt.assert_array_equal(array, [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
 
 
 if __name__ == "__main__":

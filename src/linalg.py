@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Iterable, Literal as L
-import unittest
+
+from vpython import vector
 
 # numpy data is row major
 # [1, 2, 3] is neither, but tends to be treated as a row vector `(3, 1)`
@@ -46,3 +47,8 @@ def make_vec3d_array(vecs: Iterable[Vec3d]) -> RowVec3dArray:
 def reshape_to_col_vec_array(vecs: Iterable[Vec3d]) -> ColVec3dArray:
     """Convert an iterable of vectors to an array of column vectors (shape (3, n))"""
     return np.array(vecs, dtype=np.float64).reshape((3, -1))  # type: ignore
+
+
+def to_vpy_vec(vec: Vec3d) -> vector:
+    """Convert a Vec3d to a vpython vector"""
+    return vector(vec[0], vec[1], vec[2])

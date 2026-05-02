@@ -1,73 +1,69 @@
-from vpython import vector
-from vpython.vpython import canvas, sphere, color
-from vpython.rate_control import rate
+"""Parsing ephemeris data from https://ssd.jpl.nasa.gov/horizons/app.html"""
+
+import csv
+import itertools
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Iterable, Iterator, Literal
 
 import numpy as np
+from astropy.time import Time, TimeDelta
 from numpy.typing import NDArray
-from astropy.time import Time
 
-import itertools
-from typing import Literal, Iterable
-import csv
-from datetime import datetime, timedelta
-from dataclasses import dataclass
-
-type Vec3d = np.ndarray[tuple[Literal[3]], np.dtype[np.float64]]
-type Vec3dArray = np.ndarray[tuple[Literal[3]], np.dtype[np.float64]]
-
-START_DATE = datetime(2021, 12, 25, 13, 0, 9, 1840)
+from linalg import RowVec3dArray, Vec3d
 
 
 @dataclass(frozen=True)
 class EphemerisPoint:
     time: Time
-    pos: vector
-    vel: vector
+    pos: Vec3d
+    vel: Vec3d
 
 
+@dataclass(frozen=True)
 class Ephemeris:
-    positions: Vec3dArray
-    velocities: Vec3dArray
-    times: list[Time]
+    positions: RowVec3dArray
+    velocities: RowVec3dArray
+    start_time: Time
+    timestep: TimeDelta
 
 
-ephemeris_points = []
+def _parse_row(row: list[str]) -> EphemerisPoint:
+    try:
+        return EphemerisPoint(
+            time=Time(row[0], format="jd", scale="tdb"),
+            pos=np.array([float(row[2]), float(row[3]), float(row[4])]),
+            vel=np.array([float(row[5]), float(row[6]), float(row[7])]),
+        )
+    except Exception as e:
+        raise ValueError(f"Error parsing row: {row}") from e
 
 
 # JDTDB, Calendar Date (TDB), X, Y, Z, VX, VY, VZ
-def open_ephemeris_csv(file_path: str):
+def parse_ephemeris_from_csv(file_path: Path) -> Ephemeris:
     positions: list[Vec3d] = []
     velocities: list[Vec3d] = []
     times: list[Time] = []
-    with open("jwst_path_1day.csv", "r", newline="", encoding="utf-8") as csvfile:
+    with open(file_path, "r", newline="", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile, delimiter=",")
         reader = itertools.dropwhile(
-            lambda line: not line[0].startswith("$$SOE"), reader
+            # line could be empty
+            lambda line: len(line) == 0 or not line[0].startswith("$$SOE"),
+            reader,
         )
         next(reader)  # skip the $$SOE line
-        header = list(map(lambda s: s.strip(), next(reader)))
-        assert header[0:8] == [
-            "JDTDB",
-            "Calendar Date (TDB)",
-            "X",
-            "Y",
-            "Z",
-            "VX",
-            "VY",
-            "VZ",
-        ], f"Unexpected header: {header}"
-        # start = itertools.dropwhile(lambda line: not line.startswith("$$SOE"), csvfile)
-        # next(start)  # skip the $$SOE line
-        # remove_end = itertools.takewhile(
-        #     lambda line: not line.startswith("$$EOE"), start
-        # )
 
-        # reader = csv.reader(remove_end, delimiter=",")
-        # return map(
-        #     lambda row: EphemerisPoint(
-        #         time=Time(row[0], format="jd", scale="tdb"),
-        #         pos=vector(float(row[2]), float(row[3]), float(row[4])),
-        #         vel=vector(float(row[5]), float(row[6]), float(row[7])),
-        #     ),
-        #     reader,
-        # )
+        for row in reader:
+            if row[0].startswith("$$EOE"):
+                break
+            point = _parse_row(row)
+            positions.append(point.pos)
+            velocities.append(point.vel)
+            times.append(point.time)
+    return Ephemeris(
+        positions=np.array(positions),
+        velocities=np.array(velocities),
+        start_time=times[0],
+        timestep=times[1] - times[0],
+    )

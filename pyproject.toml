@@ -1,2 +1,5 @@
 [tool.pyright]
 ignore=['typings']
+
+[tool.ruff]
+extend-select = ["I"]
