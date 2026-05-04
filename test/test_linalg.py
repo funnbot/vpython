@@ -1,13 +1,14 @@
 import unittest
-from src.linalg import (
-    reshape_to_row_vec,
-    reshape_to_col_vec,
-    reshape_to_vec3d,
-    make_vec3d_array,
-)
 
 import numpy as np
 import numpy.testing as npt
+
+from src.linalg import (
+    make_vec3d_array,
+    reshape_to_col_vec,
+    reshape_to_row_vec,
+    reshape_to_vec3d,
+)
 
 
 class TestLinalg(unittest.TestCase):

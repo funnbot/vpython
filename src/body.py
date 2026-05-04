@@ -6,6 +6,8 @@ from vpython.vpython import sphere
 from ephemeris import Ephemeris
 from linalg import to_vpy_vec
 
+G_val = float(G.to("km3 / (kg s2)").value)
+
 
 class Body(sphere):
     velocity: vector
@@ -54,5 +56,5 @@ class Body(sphere):
         if r_mag == 0:
             return vector(0, 0, 0)
         r_hat = r_vec / r_mag
-        force_mag = G * other.mass * self.mass / r_mag**2
+        force_mag = G_val * (other.mass * self.mass) / r_mag**2
         return r_hat * force_mag

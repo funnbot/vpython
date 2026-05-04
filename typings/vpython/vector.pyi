@@ -81,7 +81,7 @@ class vector:
         ...
     
     @property
-    def mag(self): # -> float:
+    def mag(self) -> float:
         ...
     
     @mag.setter
@@ -89,7 +89,7 @@ class vector:
         ...
     
     @property
-    def mag2(self): # -> float:
+    def mag2(self) -> float:
         ...
     
     @mag2.setter

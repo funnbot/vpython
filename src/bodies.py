@@ -1,10 +1,10 @@
-from body import Body
-import constants as const
-from ephemeris import parse_ephemeris_from_csv
+from pathlib import Path
 
 from vpython.vpython import color
 
-from pathlib import Path
+import constants as const
+from body import Body
+from ephemeris import parse_ephemeris_from_csv
 
 
 class System:
@@ -25,7 +25,7 @@ class System:
             scale=scale,
             color=color.blue,
             make_trail=True,
-            #retain=300,
+            retain=1000,
         )
 
         self.moon = Body(
@@ -35,7 +35,7 @@ class System:
             scale=scale,
             color=color.white,
             make_trail=True,
-            #retain=300,
+            retain=300,
         )
 
         self.neptune = Body(
@@ -45,7 +45,7 @@ class System:
             scale=scale,
             color=color.cyan,
             make_trail=True,
-            #retain=300,
+            # retain=300,
         )
 
         self.saturn = Body(
@@ -55,17 +55,17 @@ class System:
             scale=scale,
             color=color.orange,
             make_trail=True,
-            #retain=300,
+            # retain=300,
         )
 
         self.jupiter = Body(
-            ephemeris=parse_ephemeris_from_csv(data_dir / "jupiter_ephemeris.txt"),
+            ephemeris=parse_ephemeris_from_csv(data_dir / "jupiter_bc_ephemeris.txt"),
             mass=const.MASS_JUPITER,
             physical_radius=const.RADIUS_JUPITER,
             scale=scale,
             color=color.magenta,
             make_trail=True,
-            #retain=300,
+            # retain=300,
         )
 
         self.uranus = Body(
@@ -75,13 +75,13 @@ class System:
             scale=scale,
             color=color.green,
             make_trail=True,
-            #retain=300,
+            # retain=300,
         )
 
         self.voyager2 = Body(
             ephemeris=parse_ephemeris_from_csv(data_dir / "voyager2_ephemeris.txt"),
             mass=const.MASS_VOYAGER2,
-            physical_radius=100 * scale,
+            physical_radius=1000,
             scale=scale,
             color=color.red,
             make_trail=True,

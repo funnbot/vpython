@@ -1,6 +1,7 @@
-import numpy as np
-from typing import Iterable, Literal as L
+from typing import Iterable
+from typing import Literal as L
 
+import numpy as np
 from vpython import vector
 
 # numpy data is row major
@@ -52,3 +53,10 @@ def reshape_to_col_vec_array(vecs: Iterable[Vec3d]) -> ColVec3dArray:
 def to_vpy_vec(vec: Vec3d) -> vector:
     """Convert a Vec3d to a vpython vector"""
     return vector(vec[0], vec[1], vec[2])
+
+
+def set_vpy_vec(vpy_vec: vector, new_vec: Vec3d):
+    """Set the components of a vpython vector to the values of a Vec3d"""
+    vpy_vec.x = new_vec[0]
+    vpy_vec.y = new_vec[1]
+    vpy_vec.z = new_vec[2]

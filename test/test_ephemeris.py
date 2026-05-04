@@ -1,13 +1,20 @@
 import io
+import tempfile
 import unittest
 from pathlib import Path
+from typing import cast
 from unittest.mock import patch
 
 import numpy as np
-import numpy.testing as npt
-from astropy.time import Time
+from astropy.time import Time, TimeDelta
 
-from src.ephemeris import _parse_row, parse_ephemeris_from_csv
+from src.ephemeris import (
+    Ephemeris,
+    _parse_row,
+    load_cache,
+    parse_ephemeris_from_csv,
+    save_cache,
+)
 
 
 class TestEphemeris(unittest.TestCase):
@@ -26,8 +33,8 @@ class TestEphemeris(unittest.TestCase):
         point = _parse_row(row)
 
         self.assertIsInstance(point.time, Time)
-        npt.assert_array_equal(point.pos, np.array([1.0, 2.0, 3.0]))
-        npt.assert_array_equal(point.vel, np.array([0.1, 0.2, 0.3]))
+        np.testing.assert_array_equal(point.pos, np.array([1.0, 2.0, 3.0]))
+        np.testing.assert_array_equal(point.vel, np.array([0.1, 0.2, 0.3]))
 
     def test_parse_row_raises_value_error_for_invalid_data(self):
         row = [
@@ -65,12 +72,41 @@ class TestEphemeris(unittest.TestCase):
         self.assertEqual(eph.positions.shape, (2, 3))
         self.assertEqual(eph.velocities.shape, (2, 3))
 
-        npt.assert_array_equal(
+        np.testing.assert_array_equal(
             eph.positions, np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
         )
-        npt.assert_array_equal(
+        np.testing.assert_array_equal(
             eph.velocities, np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
         )
+
+    def test_save_and_load_cache_round_trips_scalar_time(self):
+        ephemeris = Ephemeris(
+            positions=np.array([[1.0, 2.0, 3.0]]),
+            velocities=np.array([[0.1, 0.2, 0.3]]),
+            start_time=Time(2459573.5, format="jd", scale="tdb"),
+            timestep=TimeDelta(1.0, format="jd"),
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = Path(temp_dir) / "ephemeris.csv"
+
+            save_cache(file_path, ephemeris)
+            cached_ephemeris = load_cache(file_path)
+
+        self.assertIsNotNone(cached_ephemeris)
+        cached_ephemeris = cast(Ephemeris, cached_ephemeris)
+
+        self.assertIsInstance(cached_ephemeris.start_time, Time)
+        self.assertAlmostEqual(
+            cast(float, cached_ephemeris.start_time.jd),
+            cast(float, ephemeris.start_time.jd),
+        )
+        self.assertAlmostEqual(
+            cast(float, cached_ephemeris.timestep.jd),
+            cast(float, ephemeris.timestep.jd),
+        )
+        np.testing.assert_array_equal(cached_ephemeris.positions, ephemeris.positions)
+        np.testing.assert_array_equal(cached_ephemeris.velocities, ephemeris.velocities)
 
 
 if __name__ == "__main__":

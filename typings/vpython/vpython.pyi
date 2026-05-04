@@ -579,7 +579,7 @@ class arrow(standardAttributes):
     
 
 
-def attach_arrow(o, attr, **args): # -> arrow:
+def attach_arrow(o, attr, **args) -> arrow:
     '''
     The object "o" with a vector attribute "p" will have an arrow attached with options such as "color".
     The length of the arrow will be args.scale*o.p", updated with every render of the scene.
