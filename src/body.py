@@ -1,6 +1,7 @@
 # why pylance angry?
 from astropy.constants import G  # type: ignore
-from vpython import mag, vector
+from numpy import sqrt
+from vpython import mag, mag2, vector
 from vpython.vpython import sphere
 
 from ephemeris import Ephemeris
@@ -50,11 +51,23 @@ class Body(sphere):
     def apply_force(self, force: vector):
         self.acceleration += force / self.mass
 
+    def apply_gravities(self, others: list["Body"]):
+        for other in others:
+            if other is self:
+                continue
+
+            r_vec = other.pos - self.pos
+            r_mag2 = mag2(r_vec)
+            if r_mag2 == 0:
+                return vector(0, 0, 0)
+            force_mag = G_val * other.mass / r_mag2
+            self.acceleration += r_vec / sqrt(r_mag2) * force_mag
+
     def grav_force_on_self_by(self, other: "Body") -> vector:
         r_vec = other.pos - self.pos
-        r_mag = mag(r_vec)
-        if r_mag == 0:
+        r_mag2 = mag2(r_vec)
+        if r_mag2 == 0:
             return vector(0, 0, 0)
-        r_hat = r_vec / r_mag
-        force_mag = G_val * (other.mass * self.mass) / r_mag**2
+        r_hat = r_vec / sqrt(r_mag2)
+        force_mag = (G_val * other.mass) * (self.mass / r_mag2)
         return r_hat * force_mag

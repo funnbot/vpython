@@ -49,7 +49,7 @@ class System:
         )
 
         self.saturn = Body(
-            ephemeris=parse_ephemeris_from_csv(data_dir / "saturn_ephemeris.txt"),
+            ephemeris=parse_ephemeris_from_csv(data_dir / "saturn_bc_ephemeris.txt"),
             mass=const.MASS_SATURN,
             physical_radius=const.RADIUS_SATURN,
             scale=scale,
@@ -68,6 +68,15 @@ class System:
             # retain=300,
         )
 
+        # self.ganymede = Body(
+        #     ephemeris=parse_ephemeris_from_csv(data_dir / "ganymede_ephemeris.txt"),
+        #     mass=const.MASS_GANYMEDE,
+        #     physical_radius=5268.2 / 2,
+        #     scale=scale,
+        #     color=color.gray(0.5),
+        #     make_trail=True,
+        # )
+
         self.uranus = Body(
             ephemeris=parse_ephemeris_from_csv(data_dir / "uranus_ephemeris.txt"),
             mass=const.MASS_URANUS,
@@ -80,20 +89,21 @@ class System:
 
         self.voyager2 = Body(
             ephemeris=parse_ephemeris_from_csv(data_dir / "voyager2_ephemeris.txt"),
-            mass=const.MASS_VOYAGER2,
+            mass=const.MASS_VOYAGER2 + const.MASS_V2_MODULE,
             physical_radius=1000,
             scale=scale,
             color=color.red,
             make_trail=True,
         )
 
-        self.bodies = [
+        self.planets = [
             self.sun,
             self.earth,
             self.moon,
-            self.voyager2,
             self.neptune,
             self.saturn,
             self.jupiter,
             self.uranus,
         ]
+
+        self.bodies = self.planets + [self.voyager2]
