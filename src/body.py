@@ -5,7 +5,7 @@ from vpython import mag, mag2, vector
 from vpython.vpython import sphere
 
 from ephemeris import Ephemeris
-from linalg import to_vpy_vec
+from linalg import set_vpy_vec, to_vpy_vec
 
 G_val = float(G.to("km3 / (kg s2)").value)
 
@@ -40,8 +40,8 @@ class Body(sphere):
         return len(self.ephemeris.positions)
 
     def update_from_ephemeris(self, index: int):
-        self.pos = to_vpy_vec(self.ephemeris.positions[index])
-        self.velocity = to_vpy_vec(self.ephemeris.velocities[index])
+        set_vpy_vec(self.pos, self.ephemeris.positions[index])
+        set_vpy_vec(self.velocity, self.ephemeris.velocities[index])
 
     def integrate(self, dt: float):
         self.velocity += self.acceleration * dt
