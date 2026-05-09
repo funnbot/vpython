@@ -1,5 +1,11 @@
 [tool.pyright]
-ignore=['typings']
+ignore = ['typings']
+typeCheckingMode = "standard"
+reportUnusedVariable = "none"
+reportUnusedImport = "none"
 
 [tool.ruff]
 extend-select = ["I"]
+
+[tool.ruff.lint]
+ignore = ["F401"]
