@@ -2,7 +2,7 @@ from typing import Iterable
 from typing import Literal as L
 
 import numpy as np
-from vpython import vector
+from vpython import acos, dot, mag, vector
 
 # numpy data is row major
 # [1, 2, 3] is neither, but tends to be treated as a row vector `(3, 1)`
@@ -60,3 +60,48 @@ def set_vpy_vec(vpy_vec: vector, new_vec: Vec3d):
     vpy_vec.x = new_vec[0]
     vpy_vec.y = new_vec[1]
     vpy_vec.z = new_vec[2]
+
+
+def angle_between(vec1: vector, vec2: vector) -> float:
+    mag1 = mag(vec1)
+    mag2 = mag(vec2)
+    if mag1 == 0 or mag2 == 0:
+        return float("inf") if mag1 != mag2 else 0
+    return acos(np.clip(dot(vec1, vec2) / (mag1 * mag2), -1, 1))
+
+
+def axis_angle_between(vec1: vector, vec2: vector) -> tuple[vector, float]:
+    mag1 = mag(vec1)
+    mag2 = mag(vec2)
+    if mag1 == 0 or mag2 == 0:
+        return vector(0, 0, 0), float("inf") if mag1 != mag2 else 0
+    angle = acos(np.clip(dot(vec1, vec2) / (mag1 * mag2), -1, 1))
+    axis = vec1.cross(vec2).hat
+    return axis, angle
+
+
+def axis_angle_to_euler(axis: vector, angle: float) -> vector:
+    s = np.sin(angle)
+    c = np.cos(angle)
+    t = 1 - c
+
+    pole = axis.x * axis.y * t + axis.z * s
+    if pole > 0.998:  # north pole singularity
+        heading = 2 * np.arctan2(axis.x * np.sin(angle / 2), np.cos(angle / 2))
+        attitude = np.pi / 2
+        bank = 0
+        return vector(heading, attitude, bank)
+    elif pole < -0.998:  # south pole singularity
+        heading = -2 * np.arctan2(axis.x * np.sin(angle / 2), np.cos(angle / 2))
+        attitude = -np.pi / 2
+        bank = 0
+        return vector(heading, attitude, bank)
+
+    heading = np.arctan2(
+        axis.y * s - axis.x * axis.z * t, 1 - (axis.y * axis.y + axis.z * axis.z) * t
+    )
+    attitude = np.arcsin(pole)
+    bank = np.arctan2(
+        axis.x * s - axis.y * axis.z * t, 1 - (axis.x * axis.x + axis.z * axis.z) * t
+    )
+    return vector(heading, attitude, bank)
