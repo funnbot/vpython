@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from vpython import vector
 from vpython.vpython import color
 
 import constants as const
@@ -8,8 +9,13 @@ from ephemeris import parse_ephemeris_from_csv
 
 
 class System:
+    planets: list[Body]
+    bodies: list[Body]
+    all_objects: list[Body]
+
     def __init__(self, scale: float, data_dir: Path):
         self.sun = Body(
+            name="Sun",
             ephemeris=parse_ephemeris_from_csv(data_dir / "sun_ephemeris.txt"),
             mass=const.MASS_SUN,
             physical_radius=const.RADIUS_SUN,
@@ -19,6 +25,7 @@ class System:
         )
 
         self.earth = Body(
+            name="Earth",
             ephemeris=parse_ephemeris_from_csv(data_dir / "earth_ephemeris.txt"),
             mass=const.MASS_EARTH,
             physical_radius=const.RADIUS_EARTH,
@@ -29,6 +36,7 @@ class System:
         )
 
         self.moon = Body(
+            name="Moon",
             ephemeris=parse_ephemeris_from_csv(data_dir / "moon_ephemeris.txt"),
             mass=const.MASS_MOON,
             physical_radius=const.RADIUS_MOON,
@@ -39,6 +47,7 @@ class System:
         )
 
         self.neptune = Body(
+            name="Neptune",
             ephemeris=parse_ephemeris_from_csv(data_dir / "neptune_ephemeris.txt"),
             mass=const.MASS_NEPTUNE,
             physical_radius=const.RADIUS_NEPTUNE,
@@ -49,6 +58,7 @@ class System:
         )
 
         self.saturn = Body(
+            name="Saturn",
             ephemeris=parse_ephemeris_from_csv(data_dir / "saturn_bc_ephemeris.txt"),
             mass=const.MASS_SATURN,
             physical_radius=const.RADIUS_SATURN,
@@ -59,6 +69,7 @@ class System:
         )
 
         self.jupiter = Body(
+            name="Jupiter",
             ephemeris=parse_ephemeris_from_csv(data_dir / "jupiter_bc_ephemeris.txt"),
             mass=const.MASS_JUPITER,
             physical_radius=const.RADIUS_JUPITER,
@@ -78,6 +89,7 @@ class System:
         # )
 
         self.uranus = Body(
+            name="Uranus",
             ephemeris=parse_ephemeris_from_csv(data_dir / "uranus_ephemeris.txt"),
             mass=const.MASS_URANUS,
             physical_radius=const.RADIUS_URANUS,
@@ -88,6 +100,7 @@ class System:
         )
 
         self.voyager2 = Body(
+            name="Voyager 2",
             ephemeris=parse_ephemeris_from_csv(data_dir / "voyager2_ephemeris.txt"),
             mass=const.MASS_VOYAGER2 + const.MASS_V2_MODULE,
             physical_radius=1000,
@@ -96,8 +109,17 @@ class System:
             make_trail=True,
         )
 
+        self.voyager2_expected = Body(
+            name="Voyager 2 (Expected)",
+            ephemeris=parse_ephemeris_from_csv(data_dir / "voyager2_ephemeris.txt"),
+            mass=const.MASS_VOYAGER2 + const.MASS_V2_MODULE,
+            physical_radius=1000,
+            scale=scale,
+            color=vector(0.5, 0, 0),
+            make_trail=True,
+        )
+
         self.planets = [
-            self.sun,
             self.earth,
             self.moon,
             self.neptune,
@@ -105,5 +127,5 @@ class System:
             self.jupiter,
             self.uranus,
         ]
-
-        self.bodies = self.planets + [self.voyager2]
+        self.bodies = self.planets + [self.sun]
+        self.all_objects = self.bodies + [self.voyager2]

@@ -105,3 +105,34 @@ def axis_angle_to_euler(axis: vector, angle: float) -> vector:
         axis.x * s - axis.y * axis.z * t, 1 - (axis.x * axis.x + axis.z * axis.z) * t
     )
     return vector(heading, attitude, bank)
+
+
+def percent_diff(diff: float, range: float) -> float:
+    range = abs(range)
+    if range < 0.0001:
+        return 0
+    return abs(diff) / range * 100
+
+
+def percent_angle_uncertainty(angle_diff: float) -> float:
+    return percent_diff(angle_diff, np.pi * 2)
+
+
+def percent_uncertainty(value: float, expected: float) -> float:
+    return percent_diff(value - expected, expected)
+
+
+def percent_vec_uncertainty(value: vector, expected: vector) -> vector:
+    return vector(
+        percent_uncertainty(value.x, expected.x),
+        percent_uncertainty(value.y, expected.y),
+        percent_uncertainty(value.z, expected.z),
+    )
+
+
+def percent_vec_uncertainty_sum(value: vector, expected: vector) -> float:
+    return (
+        percent_uncertainty(value.x, expected.x)
+        + percent_uncertainty(value.y, expected.y)
+        + percent_uncertainty(value.z, expected.z)
+    ) / 3
